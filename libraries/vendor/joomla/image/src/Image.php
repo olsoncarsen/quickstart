@@ -8,9 +8,9 @@
 
 namespace Joomla\Image;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareInterface;
 
 /**
  * Class to manipulate an image.
@@ -75,7 +75,7 @@ class Image implements LoggerAwareInterface
 	const ORIENTATION_SQUARE = 'square';
 
 	/**
-	 * @var    resource|\GdImage  The image resource handle.
+	 * @var    resource  The image resource handle.
 	 * @since  1.0
 	 */
 	protected $handle;
@@ -84,7 +84,7 @@ class Image implements LoggerAwareInterface
 	 * @var    string  The source image path.
 	 * @since  1.0
 	 */
-	protected $path;
+	protected $path = null;
 
 	/**
 	 * @var    array  Whether or not different image formats are supported.
@@ -96,7 +96,7 @@ class Image implements LoggerAwareInterface
 	 * @var    LoggerInterface  Logger object
 	 * @since  1.0
 	 */
-	protected $logger;
+	protected $logger = null;
 
 	/**
 	 * @var    boolean  Flag if an image should use the best quality available.  Disable for improved performance.
@@ -115,7 +115,7 @@ class Image implements LoggerAwareInterface
 	public function __construct($source = null)
 	{
 		// Verify that GD support for PHP is available.
-		if (!\extension_loaded('gd'))
+		if (!extension_loaded('gd'))
 		{
 			// @codeCoverageIgnoreStart
 			throw new \RuntimeException('The GD extension for PHP is not available.');
@@ -126,18 +126,18 @@ class Image implements LoggerAwareInterface
 		// Determine which image types are supported by GD, but only once.
 		if (!isset(static::$formats[IMAGETYPE_JPEG]))
 		{
-			$info                            = gd_info();
+			$info = gd_info();
 			static::$formats[IMAGETYPE_JPEG] = ($info['JPEG Support']) ? true : false;
-			static::$formats[IMAGETYPE_PNG]  = ($info['PNG Support']) ? true : false;
-			static::$formats[IMAGETYPE_GIF]  = ($info['GIF Read Support']) ? true : false;
+			static::$formats[IMAGETYPE_PNG] = ($info['PNG Support']) ? true : false;
+			static::$formats[IMAGETYPE_GIF] = ($info['GIF Read Support']) ? true : false;
 		}
 
 		// If the source input is a resource, set it as the image handle.
-		if ($this->isValidImage($source))
+		if (is_resource($source) && (get_resource_type($source) == 'gd'))
 		{
 			$this->handle = &$source;
 		}
-		elseif (!empty($source) && \is_string($source))
+		elseif (!empty($source) && is_string($source))
 		{
 			// If the source input is not empty, assume it is a path and populate the image handle.
 			$this->loadFile($source);
@@ -260,6 +260,8 @@ class Image implements LoggerAwareInterface
 		{
 			return self::getOrientationString($this->getWidth(), $this->getHeight());
 		}
+
+		return null;
 	}
 
 	/**
@@ -276,10 +278,10 @@ class Image implements LoggerAwareInterface
 	{
 		switch (true)
 		{
-			case $width > $height :
+			case ($width > $height) :
 				return self::ORIENTATION_LANDSCAPE;
 
-			case $width < $height :
+			case ($width < $height) :
 				return self::ORIENTATION_PORTRAIT;
 
 			default:
@@ -309,7 +311,7 @@ class Image implements LoggerAwareInterface
 		}
 
 		// Accept a single thumbsize string as parameter
-		if (!\is_array($thumbSizes))
+		if (!is_array($thumbSizes))
 		{
 			$thumbSizes = array($thumbSizes);
 		}
@@ -324,7 +326,7 @@ class Image implements LoggerAwareInterface
 				// Desired thumbnail size
 				$size = explode('x', strtolower($thumbSize));
 
-				if (\count($size) != 2)
+				if (count($size) != 2)
 				{
 					throw new \InvalidArgumentException('Invalid thumb size received: ' . $thumbSize);
 				}
@@ -334,21 +336,18 @@ class Image implements LoggerAwareInterface
 
 				switch ($creationMethod)
 				{
-					// Crop
-					case self::CROP:
+					// Case for self::CROP
+					case 4:
 						$thumb = $this->crop($thumbWidth, $thumbHeight, null, null, true);
-
 						break;
 
-					// Crop-resize
-					case self::CROP_RESIZE:
+					// Case for self::CROP_RESIZE
+					case 5:
 						$thumb = $this->cropResize($thumbWidth, $thumbHeight, true);
-
 						break;
 
 					default:
 						$thumb = $this->resize($thumbWidth, $thumbHeight, true, $creationMethod);
-
 						break;
 				}
 
@@ -383,13 +382,13 @@ class Image implements LoggerAwareInterface
 		}
 
 		// No thumbFolder set -> we will create a thumbs folder in the current image folder
-		if ($thumbsFolder === null)
+		if (is_null($thumbsFolder))
 		{
-			$thumbsFolder = \dirname($this->getPath()) . '/thumbs';
+			$thumbsFolder = dirname($this->getPath()) . '/thumbs';
 		}
 
 		// Check destination
-		if (!is_dir($thumbsFolder) && (!is_dir(\dirname($thumbsFolder)) || !@mkdir($thumbsFolder)))
+		if (!is_dir($thumbsFolder) && (!is_dir(dirname($thumbsFolder)) || !@mkdir($thumbsFolder)))
 		{
 			throw new \InvalidArgumentException('Folder does not exist and cannot be created: ' . $thumbsFolder);
 		}
@@ -419,7 +418,7 @@ class Image implements LoggerAwareInterface
 				if ($thumb->toFile($thumbFileName, $imgProperties->type))
 				{
 					// Return Image object with thumb path to ease further manipulation
-					$thumb->path     = $thumbFileName;
+					$thumb->path = $thumbFileName;
 					$thumbsCreated[] = $thumb;
 				}
 			}
@@ -452,12 +451,12 @@ class Image implements LoggerAwareInterface
 		$height = $this->sanitizeHeight($height, $width);
 
 		// Autocrop offsets
-		if ($left === null)
+		if (is_null($left))
 		{
 			$left = round(($this->getWidth() - $width) / 2);
 		}
 
-		if ($top === null)
+		if (is_null($top))
 		{
 			$top = round(($this->getHeight() - $height) / 2);
 		}
@@ -589,7 +588,12 @@ class Image implements LoggerAwareInterface
 	public function isLoaded()
 	{
 		// Make sure the resource handle is valid.
-		return $this->isValidImage($this->handle);
+		if (!is_resource($this->handle) || (get_resource_type($this->handle) != 'gd'))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -648,7 +652,7 @@ class Image implements LoggerAwareInterface
 				// Attempt to create the image handle.
 				$handle = imagecreatefromgif($path);
 
-				if (!$this->isValidImage($handle))
+				if (!is_resource($handle))
 				{
 					// @codeCoverageIgnoreStart
 					throw new \RuntimeException('Unable to process GIF image.');
@@ -657,7 +661,6 @@ class Image implements LoggerAwareInterface
 				}
 
 				$this->handle = $handle;
-
 				break;
 
 			case 'image/jpeg':
@@ -675,7 +678,7 @@ class Image implements LoggerAwareInterface
 				// Attempt to create the image handle.
 				$handle = imagecreatefromjpeg($path);
 
-				if (!$this->isValidImage($handle))
+				if (!is_resource($handle))
 				{
 					// @codeCoverageIgnoreStart
 					throw new \RuntimeException('Unable to process JPG image.');
@@ -684,7 +687,6 @@ class Image implements LoggerAwareInterface
 				}
 
 				$this->handle = $handle;
-
 				break;
 
 			case 'image/png':
@@ -702,7 +704,7 @@ class Image implements LoggerAwareInterface
 				// Attempt to create the image handle.
 				$handle = imagecreatefrompng($path);
 
-				if (!$this->isValidImage($handle))
+				if (!is_resource($handle))
 				{
 					// @codeCoverageIgnoreStart
 					throw new \RuntimeException('Unable to process PNG image.');
@@ -750,7 +752,7 @@ class Image implements LoggerAwareInterface
 		$dimensions = $this->prepareDimensions($width, $height, $scaleMethod);
 
 		// Instantiate offset.
-		$offset    = new \stdClass;
+		$offset = new \stdClass;
 		$offset->x = $offset->y = 0;
 
 		// Center image if needed and create the new truecolor image handle.
@@ -781,7 +783,7 @@ class Image implements LoggerAwareInterface
 		if ($this->isTransparent())
 		{
 			// Get the transparent color values for the current image.
-			$rgba  = imagecolorsforindex($this->getHandle(), imagecolortransparent($this->getHandle()));
+			$rgba = imagecolorsforindex($this->getHandle(), imagecolortransparent($this->getHandle()));
 			$color = imagecolorallocatealpha($handle, $rgba['red'], $rgba['green'], $rgba['blue'], $rgba['alpha']);
 
 			// Set the transparent color values for the new image.
@@ -855,7 +857,7 @@ class Image implements LoggerAwareInterface
 		$width   = $this->sanitizeWidth($width, $height);
 		$height  = $this->sanitizeHeight($height, $width);
 
-		$resizewidth  = $width;
+		$resizewidth = $width;
 		$resizeheight = $height;
 
 		if (($this->getWidth() / $width) < ($this->getHeight() / $height))
@@ -927,7 +929,7 @@ class Image implements LoggerAwareInterface
 	/**
 	 * Method to flip the current image.
 	 *
-	 * @param   integer  $mode       The flip mode for flipping the image {@link https://www.php.net/imageflip#refsect1-function.imageflip-parameters}
+	 * @param   integer  $mode       The flip mode for flipping the image {@link http://php.net/imageflip#refsect1-function.imageflip-parameters}
 	 * @param   boolean  $createNew  If true the current image will be cloned, flipped and returned; else
 	 *                               the current image will be flipped and returned.
 	 *
@@ -979,7 +981,7 @@ class Image implements LoggerAwareInterface
 	 * @return  Image
 	 *
 	 * @since   1.3.0
-	 * @link    https://www.php.net/manual/en/image.examples-watermark.php
+	 * @link    https://secure.php.net/manual/en/image.examples-watermark.php
 	 */
 	public function watermark(Image $watermark, $transparency = 50, $bottomMargin = 0, $rightMargin = 0)
 	{
@@ -1009,7 +1011,7 @@ class Image implements LoggerAwareInterface
 	 *
 	 * @return  boolean
 	 *
-	 * @link    https://www.php.net/manual/image.constants.php
+	 * @link    http://www.php.net/manual/image.constants.php
 	 * @since   1.0
 	 * @throws  \LogicException
 	 */
@@ -1019,9 +1021,11 @@ class Image implements LoggerAwareInterface
 		{
 			case IMAGETYPE_GIF:
 				return imagegif($this->getHandle(), $path);
+				break;
 
 			case IMAGETYPE_PNG:
 				return imagepng($this->getHandle(), $path, (array_key_exists('quality', $options)) ? $options['quality'] : 0);
+				break;
 		}
 
 		// Case IMAGETYPE_JPEG & default
@@ -1090,9 +1094,8 @@ class Image implements LoggerAwareInterface
 		switch ($scaleMethod)
 		{
 			case self::SCALE_FILL:
-				$dimensions->width  = (int) round($width);
+				$dimensions->width = (int) round($width);
 				$dimensions->height = (int) round($height);
-
 				break;
 
 			case self::SCALE_INSIDE:
@@ -1110,13 +1113,13 @@ class Image implements LoggerAwareInterface
 					$ratio = min($rx, $ry);
 				}
 
-				$dimensions->width  = (int) round($this->getWidth() / $ratio);
+				$dimensions->width = (int) round($this->getWidth() / $ratio);
 				$dimensions->height = (int) round($this->getHeight() / $ratio);
-
 				break;
 
 			default:
 				throw new \InvalidArgumentException('Invalid scale method.');
+				break;
 		}
 
 		return $dimensions;
@@ -1143,8 +1146,8 @@ class Image implements LoggerAwareInterface
 			$height = (int) round($this->getHeight() * (float) str_replace('%', '', $height) / 100);
 		}
 		else
+		// Else do some rounding so we come out with a sane integer value.
 		{
-			// Else do some rounding so we come out with a sane integer value.
 			$height = (int) round((float) $height);
 		}
 
@@ -1186,8 +1189,8 @@ class Image implements LoggerAwareInterface
 			$width = (int) round($this->getWidth() * (float) str_replace('%', '', $width) / 100);
 		}
 		else
+		// Else do some rounding so we come out with a sane integer value.
 		{
-			// Else do some rounding so we come out with a sane integer value.
 			$width = (int) round((float) $width);
 		}
 
@@ -1195,7 +1198,8 @@ class Image implements LoggerAwareInterface
 	}
 
 	/**
-	 * Method to destroy an image handle and free the memory associated with the handle
+	 * Method to destroy an image handle and
+	 * free the memory associated with the handle
 	 *
 	 * @return  boolean  True on success, false on failure or if no image is loaded
 	 *
@@ -1212,7 +1216,8 @@ class Image implements LoggerAwareInterface
 	}
 
 	/**
-	 * Method to call the destroy() method one last time to free any memory when the object is unset
+	 * Method to call the destroy() method one last time
+	 * to free any memory when the object is unset
 	 *
 	 * @see    Image::destroy()
 	 * @since  1.0
@@ -1234,17 +1239,5 @@ class Image implements LoggerAwareInterface
 	public function setThumbnailGenerate($quality = true)
 	{
 		$this->generateBestQuality = (boolean) $quality;
-	}
-
-	/**
-	 * @param   mixed  $handle  A potential image handle
-	 *
-	 * @return  boolean
-	 */
-	private function isValidImage($handle)
-	{
-		// @todo Remove resource check, once PHP7 support is dropped.
-		return (\is_resource($handle) && \get_resource_type($handle) === 'gd')
-			   || (\is_object($handle) && $handle instanceof \GDImage);
 	}
 }

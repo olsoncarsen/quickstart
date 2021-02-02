@@ -9,8 +9,6 @@
 
 defined('_JEXEC') or die;
 
-use Joomla\String\StringHelper;
-
 define('FINDER_PATH_INDEXER', JPATH_ADMINISTRATOR . '/components/com_finder/helpers/indexer');
 JLoader::register('FinderIndexerHelper', FINDER_PATH_INDEXER . '/helper.php');
 
@@ -94,7 +92,7 @@ class FinderModelSuggestions extends JModelList
 			->order('t.weight DESC');
 
 		// Determine the relevant mapping table suffix by inverting the logic from drivers
-		$mappingTableSuffix = StringHelper::substr(md5(StringHelper::substr($this->getState('input'), 0, 1)), 0, 1);
+		$mappingTableSuffix = substr(md5(substr($this->getState('input'), 0, 1)), 0, 1);
 
 		// Join mapping table for term <-> link relation
 		$mappingTable = $db->quoteName('#__finder_links_terms' . $mappingTableSuffix);

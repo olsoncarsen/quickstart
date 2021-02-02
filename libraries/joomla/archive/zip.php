@@ -305,12 +305,15 @@ class JArchiveZip implements JArchiveExtractable
 				continue;
 			}
 
-			$buffer = $zip->getFromIndex($index);
+			$stream = $zip->getStream($file);
 
-			if ($buffer === false)
+			if ($stream === false)
 			{
 				return $this->raiseWarning(100, 'Unable to read entry');
 			}
+
+			$buffer = stream_get_contents($stream);
+			fclose($stream);
 
 			if (JFile::write($destination . '/' . $file, $buffer) === false)
 			{

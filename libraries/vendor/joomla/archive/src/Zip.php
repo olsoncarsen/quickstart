@@ -270,8 +270,8 @@ class Zip implements ExtractableInterface
 	 *
 	 * @return  boolean  True on success
 	 *
-	 * @throws  \RuntimeException
 	 * @since   1.0
+	 * @throws  \RuntimeException
 	 */
 	protected function extractNative($archive, $destination)
 	{
@@ -285,7 +285,7 @@ class Zip implements ExtractableInterface
 		// Make sure the destination folder exists
 		if (!Folder::create($destination))
 		{
-			throw new \RuntimeException('Unable to create destination folder ' . \dirname($destination));
+			throw new \RuntimeException('Unable to create destination folder ' . \dirname($path));
 		}
 
 		// Read files in the archive
@@ -298,12 +298,15 @@ class Zip implements ExtractableInterface
 				continue;
 			}
 
-			$buffer = $zip->getFromIndex($index);
+			$stream = $zip->getStream($file);
 
-			if ($buffer === false)
+			if ($stream === false)
 			{
 				throw new \RuntimeException('Unable to read ZIP entry');
 			}
+
+			$buffer = stream_get_contents($stream);
+			fclose($stream);
 
 			if (File::write($destination . '/' . $file, $buffer) === false)
 			{

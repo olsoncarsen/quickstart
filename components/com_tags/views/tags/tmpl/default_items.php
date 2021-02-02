@@ -99,13 +99,12 @@ JFactory::getDocument()->addScriptDeclaration("
 				<span class="tag-body">
 					<?php if (!empty($images->image_intro)) : ?>
 						<?php $imgfloat = empty($images->float_intro) ? $this->params->get('float_intro') : $images->float_intro; ?>
-						<div class="pull-<?php echo htmlspecialchars($imgfloat, ENT_QUOTES, 'UTF-8'); ?> item-image">
+						<div class="pull-<?php echo htmlspecialchars($imgfloat); ?> item-image">
 							<img
 								<?php if ($images->image_intro_caption) : ?>
-									<?php echo 'class="caption"' . ' title="' . htmlspecialchars($images->image_intro_caption, ENT_QUOTES, 'UTF-8') . '"'; ?>
+									<?php echo 'class="caption"' . ' title="' . htmlspecialchars($images->image_intro_caption) . '"'; ?>
 								<?php endif; ?>
-								src="<?php echo htmlspecialchars($images->image_intro, ENT_QUOTES, 'UTF-8'); ?>"
-								alt="<?php echo htmlspecialchars($images->image_intro_alt, ENT_QUOTES, 'UTF-8'); ?>" />
+								src="<?php echo $images->image_intro; ?>" alt="<?php echo htmlspecialchars($images->image_intro_alt); ?>" />
 						</div>
 					<?php endif; ?>
 				</span>
@@ -144,3 +143,4 @@ JFactory::getDocument()->addScriptDeclaration("
 		<?php endif; ?>
 	<?php endif; ?>
 </form>
+

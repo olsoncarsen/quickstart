@@ -20,15 +20,6 @@ defined('JPATH_PLATFORM') or die;
 class JFormFieldPassword extends JFormField
 {
 	/**
-	 * Attach an unlock button and disable the input field,
-	 * also remove the value from the output.
-	 *
-	 * @var    boolean
-	 * @since  3.9.24
-	 */
-	protected $lock = false;
-
-	/**
 	 * The form field type.
 	 *
 	 * @var    string
@@ -81,7 +72,6 @@ class JFormFieldPassword extends JFormField
 	{
 		switch ($name)
 		{
-			case 'lock':
 			case 'threshold':
 			case 'maxLength':
 			case 'meter':
@@ -112,9 +102,8 @@ class JFormFieldPassword extends JFormField
 				$this->$name = $value;
 				break;
 
-			case 'lock':
 			case 'meter':
-				$this->$name = ($value === 'true' || $value === $name || $value === '1');
+				$this->meter = ($value === 'true' || $value === $name || $value === '1');
 				break;
 
 			default:
@@ -142,9 +131,6 @@ class JFormFieldPassword extends JFormField
 
 		if ($return)
 		{
-			$lock       = (string) $this->element['lock'];
-			$this->lock = ($lock == 'true' || $lock == 'on' || $lock == '1');
-
 			$this->maxLength = $this->element['maxlength'] ? (int) $this->element['maxlength'] : 99;
 			$this->threshold = $this->element['threshold'] ? (int) $this->element['threshold'] : 66;
 
@@ -181,7 +167,6 @@ class JFormFieldPassword extends JFormField
 
 		// Initialize some field attributes.
 		$extraData = array(
-			'lock'      => $this->lock,
 			'maxLength' => $this->maxLength,
 			'meter'     => $this->meter,
 			'threshold' => $this->threshold,

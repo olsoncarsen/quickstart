@@ -20,9 +20,9 @@ $listOrder  = $this->escape($this->state->get('list.ordering'));
 $listDirn   = $this->escape($this->state->get('list.direction'));
 $langFilter = false;
 
-// Tags filtering based on language filter
+// Tags filtering based on language filter 
 if (($this->params->get('filter_field') === 'tag') && (Multilanguage::isEnabled()))
-{
+{ 
 	$tagfilter = ComponentHelper::getParams('com_tags')->get('tag_list_language_filter');
 
 	switch ($tagfilter)
@@ -63,10 +63,6 @@ JFactory::getDocument()->addStyleDeclaration('
 ');
 
 $tableClass = $this->params->get('show_headings') != 1 ? ' table-noheader' : '';
-
-$nullDate    = JFactory::getDbo()->getNullDate();
-$currentDate = JFactory::getDate()->format('Y-m-d H:i:s');
-
 ?>
 <form action="<?php echo htmlspecialchars(JUri::getInstance()->toString()); ?>" method="post" name="adminForm" id="adminForm" class="form-inline">
 <?php if ($this->params->get('filter_field') !== 'hide' || $this->params->get('show_pagination_limit')) : ?>
@@ -217,12 +213,12 @@ $currentDate = JFactory::getDate()->format('Y-m-d H:i:s');
 								<?php echo JText::_('JUNPUBLISHED'); ?>
 							</span>
 				<?php endif; ?>
-				<?php if ($article->publish_up > $currentDate) : ?>
+				<?php if (strtotime($article->publish_up) > strtotime(JFactory::getDate())) : ?>
 					<span class="list-published label label-warning">
 								<?php echo JText::_('JNOTPUBLISHEDYET'); ?>
 							</span>
 				<?php endif; ?>
-				<?php if ($article->publish_down < $currentDate && $article->publish_down !== $nullDate) : ?>
+				<?php if ((strtotime($article->publish_down) < strtotime(JFactory::getDate())) && $article->publish_down != JFactory::getDbo()->getNullDate()) : ?>
 					<span class="list-published label label-warning">
 								<?php echo JText::_('JEXPIRED'); ?>
 							</span>

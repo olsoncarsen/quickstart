@@ -17,15 +17,12 @@ $overlib = $displayData['overlib'];
 // @deprecated  4.0  The legacy icon flag will be removed from this layout in 4.0
 $legacy  = $displayData['legacy'];
 
-$currentDate   = JFactory::getDate()->format('Y-m-d H:i:s');
-$isUnpublished = ($article->publish_up > $currentDate)
-	|| ($article->publish_down < $currentDate && $article->publish_down !== JFactory::getDbo()->getNullDate());
-
 if ($legacy)
 {
 	$icon = $article->state ? 'edit.png' : 'edit_unpublished.png';
 
-	if ($isUnpublished)
+	if (strtotime($article->publish_up) > strtotime(JFactory::getDate())
+		|| ((strtotime($article->publish_down) < strtotime(JFactory::getDate())) && $article->publish_down != JFactory::getDbo()->getNullDate()))
 	{
 		$icon = 'edit_unpublished.png';
 	}
@@ -34,7 +31,8 @@ else
 {
 	$icon = $article->state ? 'edit' : 'eye-close';
 
-	if ($isUnpublished)
+	if (strtotime($article->publish_up) > strtotime(JFactory::getDate())
+		|| ((strtotime($article->publish_down) < strtotime(JFactory::getDate())) && $article->publish_down != JFactory::getDbo()->getNullDate()))
 	{
 		$icon = 'eye-close';
 	}

@@ -2068,8 +2068,7 @@ class FOFModel extends FOFUtilsObject
 		$query = $db->getQuery(true);
 
 		// Call the behaviors
-		$self = $this; // Fix "Argument #1 ($model) must be passed by reference, value given in"
-		$this->modelDispatcher->trigger('onBeforeBuildQuery', array(&$self, &$query));
+		$this->modelDispatcher->trigger('onBeforeBuildQuery', array(&$this, &$query));
 
 		$alias = $this->getTableAlias();
 
@@ -2113,7 +2112,7 @@ class FOFModel extends FOFUtilsObject
 		}
 
 		// Call the behaviors
-		$this->modelDispatcher->trigger('onAfterBuildQuery', array(&$self, &$query));
+		$this->modelDispatcher->trigger('onAfterBuildQuery', array(&$this, &$query));
 
 		return $query;
 	}
@@ -2713,8 +2712,7 @@ class FOFModel extends FOFUtilsObject
 		try
 		{
 			// Call the behaviors
-			$self   = $this;
-			$result = $this->modelDispatcher->trigger('onAfterGetItem', array(&$self, &$record));
+			$result = $this->modelDispatcher->trigger('onAfterGetItem', array(&$this, &$record));
 		}
 		catch (Exception $e)
 		{
@@ -2750,8 +2748,7 @@ class FOFModel extends FOFUtilsObject
 			$table->bind($data);
 
 			// Call the behaviors
-			$self   = $this;
-			$result = $this->modelDispatcher->trigger('onBeforeSave', array(&$self, &$data));
+			$result = $this->modelDispatcher->trigger('onBeforeSave', array(&$this, &$data));
 
 			if (in_array(false, $result, true))
 			{
@@ -2798,8 +2795,7 @@ class FOFModel extends FOFUtilsObject
 		try
 		{
 			// Call the behaviors
-			$self   = $this;
-			$result = $this->modelDispatcher->trigger('onAfterSave', array(&$self));
+			$result = $this->modelDispatcher->trigger('onAfterSave', array(&$this));
 
 			if (in_array(false, $result, true))
 			{
@@ -2840,8 +2836,7 @@ class FOFModel extends FOFUtilsObject
 			$table->load($id);
 
 			// Call the behaviors
-			$self   = $this;
-			$result = $this->modelDispatcher->trigger('onBeforeDelete', array(&$self));
+			$result = $this->modelDispatcher->trigger('onBeforeDelete', array(&$this));
 
 			if (in_array(false, $result, true))
 			{
@@ -2885,8 +2880,7 @@ class FOFModel extends FOFUtilsObject
 		FOFPlatform::getInstance()->importPlugin('content');
 
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onAfterDelete', array(&$self));
+		$result = $this->modelDispatcher->trigger('onAfterDelete', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -2920,8 +2914,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onBeforeCopy(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onBeforeCopy', array(&$self));
+		$result = $this->modelDispatcher->trigger('onBeforeCopy', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -2942,8 +2935,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onAfterCopy(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onAfterCopy', array(&$self));
+		$result = $this->modelDispatcher->trigger('onAfterCopy', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -2964,8 +2956,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onBeforePublish(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onBeforePublish', array(&$self));
+		$result = $this->modelDispatcher->trigger('onBeforePublish', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -2986,8 +2977,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onAfterPublish(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onAfterPublish', array(&$self));
+		$result = $this->modelDispatcher->trigger('onAfterPublish', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -3008,8 +2998,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onBeforeHit(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onBeforeHit', array(&$self));
+		$result = $this->modelDispatcher->trigger('onBeforeHit', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -3030,8 +3019,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onAfterHit(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onAfterHit', array(&$self));
+		$result = $this->modelDispatcher->trigger('onAfterHit', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -3052,8 +3040,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onBeforeMove(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onBeforeMove', array(&$self));
+		$result = $this->modelDispatcher->trigger('onBeforeMove', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -3074,8 +3061,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onAfterMove(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onAfterMove', array(&$self));
+		$result = $this->modelDispatcher->trigger('onAfterMove', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -3096,8 +3082,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onBeforeReorder(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onBeforeReorder', array(&$self));
+		$result = $this->modelDispatcher->trigger('onBeforeReorder', array(&$this));
 
 		if (in_array(false, $result, true))
 		{
@@ -3118,8 +3103,7 @@ class FOFModel extends FOFUtilsObject
 	protected function onAfterReorder(&$table)
 	{
 		// Call the behaviors
-		$self   = $this;
-		$result = $this->modelDispatcher->trigger('onAfterReorder', array(&$self));
+		$result = $this->modelDispatcher->trigger('onAfterReorder', array(&$this));
 
 		if (in_array(false, $result, true))
 		{

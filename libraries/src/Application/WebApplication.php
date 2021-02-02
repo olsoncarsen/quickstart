@@ -182,8 +182,7 @@ class WebApplication extends BaseApplication
 		'x-content-type-options',
 		'referrer-policy',
 		'expect-ct',
-		'feature-policy', // @deprecated - see: https://scotthelme.co.uk/goodbye-feature-policy-and-hello-permissions-policy/
-		'permissions-policy',
+		'feature-policy',
 	);
 
 	/**

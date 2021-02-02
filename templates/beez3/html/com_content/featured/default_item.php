@@ -20,13 +20,11 @@ $images         = json_decode($this->item->images);
 $app            = JFactory::getApplication();
 $templateparams = $app->getTemplate(true)->params;
 
-$currentDate   = JFactory::getDate()->format('Y-m-d H:i:s');
-$isUnpublished = ($this->item->state == 0 || $this->item->publish_up > $currentDate)
-	|| ($this->item->publish_down < $currentDate && $this->item->publish_down !== JFactory::getDbo()->getNullDate());
-
 ?>
-<?php if ($isUnpublished) : ?>
-	<div class="system-unpublished">
+
+<?php if ($this->item->state == 0 || strtotime($this->item->publish_up) > strtotime(JFactory::getDate())
+	|| (strtotime($this->item->publish_down) < strtotime(JFactory::getDate()) && $this->item->publish_down !== JFactory::getDbo()->getNullDate())) : ?>
+<div class="system-unpublished">
 <?php endif; ?>
 <?php if ($params->get('show_title')) : ?>
 	<h2>
@@ -171,8 +169,9 @@ $isUnpublished = ($this->item->state == 0 || $this->item->publish_up > $currentD
 		</p>
 <?php endif; ?>
 
-<?php if ($isUnpublished) : ?>
-	</div>
+<?php if ($this->item->state == 0 || strtotime($this->item->publish_up) > strtotime(JFactory::getDate())
+	|| (strtotime($this->item->publish_down) < strtotime(JFactory::getDate()) && $this->item->publish_down !== JFactory::getDbo()->getNullDate())) : ?>
+</div>
 <?php endif; ?>
 
 <div class="item-separator"></div>
